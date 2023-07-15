@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ user.name }}'s Movies - MovieWeb App</title>
+</head>
+<body>
+    <h1>{{ user.name }}'s Favorite Movies</h1>
+    <ul>
+        {% for movie in movies %}
+            <li>{{ movie.title }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/users">Back to Users List</a>
+</body>
+</html>
