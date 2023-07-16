@@ -63,38 +63,39 @@ def add_movie(user_id):
     """
     movie_data = request.get_json()
     new_movie = Movie(**movie_data)
-    data_manager.create_movie(new_movie)
+    if not data_manager.get_movie(new_movie.id):
+        data_manager.create_movie(new_movie)
     user = data_manager.get_user(user_id)
     user.watched_movies.append(new_movie.id)
+    movie = data_manager.get_movie(new_movie.id)
+    movie.watched_by.append(user.id)
     data_manager.update_user(user_id, user.__dict__)
+    data_manager.update_movie(movie.id, movie.__dict__)
     return jsonify({'status': 'Movie added successfully to user favorites'})
 
-@app.route('/users/<int:user_id>/update_movie/<int:movie_id>', methods=['PUT'])
-def update_movie(user_id, movie_id):
+@app.route('/users/update_movie/<int:movie_id>', methods=['PUT'])
+def update_movie(movie_id):
     """
     Endpoint to update details of a specific movie in a user's list.
 
-    :param user_id: The ID of the user.
     :param movie_id: The ID of the movie.
     :return: Status of the operation.
     """
-    movie_data = request.get_json()
-    data_manager.update_user_movie(user_id, movie_id, movie_data)
+    res = request.get_json()
+    if not data_manager.get_movie(movie_id):
+        return jsonify({'status': 'Movie Not Found!'})
+    data_manager.update_movie(movie_id, res)
     return jsonify({'status': 'Movie updated successfully'})
 
-@app.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=['DELETE'])
-def delete_movie(user_id, movie_id):
+@app.route('/users/delete_movie/<int:movie_id>', methods=['DELETE'])
+def delete_movie(movie_id):
     """
     Endpoint to delete a specific movie from a user's favorite list.
 
-    :param user_id: The ID of the user.
     :param movie_id: The ID of the movie.
     :return: Status of the operation.
     """
     data_manager.delete_movie(movie_id)
-    user = data_manager.get_user(user_id)
-    user.watched_movies.remove(movie_id)
-    data_manager.update_user(user_id, user.__dict__)
     return jsonify({'status': 'Movie deleted successfully from user favorites'})
 
 if __name__ == '__main__':

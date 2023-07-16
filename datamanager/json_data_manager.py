@@ -67,7 +67,9 @@ class JSONDataManager(DataManagerInterface):
         # Update the details of a movie for a given user
         movie = next((movie for movie in self.movies if movie['id'] == movie_id), None)
         if movie is not None and user_id in movie['watched_by']:
+            print(movie, new_info)
             movie.update(new_info)
+            print(movie)
             self.save_data()
             return True
         return False
@@ -110,6 +112,11 @@ class JSONDataManager(DataManagerInterface):
         :param user_id: The ID of the User to be deleted.
         '''
         self.users = [user for user in self.users if user['id'] != user_id]
+        # Find user_id in all movies and delete them
+        for movie in self.movies:
+            if movie['watched_by'] is not None and user_id in movie['watched_by']:
+                movie['watched_by'] = [uid for uid in movie['watched_by'] if uid != user_id]
+
         self.save_data()
 
     def create_movie(self, movie: Movie):
@@ -141,6 +148,7 @@ class JSONDataManager(DataManagerInterface):
         movie = next((movie for movie in self.movies if movie['id'] == movie_id), None)
         if movie:
             movie.update(new_info)
+            print(movie, new_info)
             self.save_data()
 
     def delete_movie(self, movie_id: int):
@@ -150,5 +158,10 @@ class JSONDataManager(DataManagerInterface):
         :param movie_id: The ID of the Movie to be deleted.
         '''
         self.movies = [movie for movie in self.movies if movie['id'] != movie_id]
+        # Find movie_id in all users and delete them
+        for user in self.users:
+            if user['watched_movies'] is not None and movie_id in user['watched_movies']:
+                user['watched_movies'] = [mid for mid in user['watched_movies'] if mid != movie_id]
+
         self.save_data()
 
