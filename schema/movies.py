@@ -1,8 +1,8 @@
 '''
 Movies Datamodel
 '''
-from ast import List
-from dataclasses import dataclass
+from typing import List, Optional
+from dataclasses import dataclass, field
 
 @dataclass
 class Movie:
@@ -14,4 +14,4 @@ class Movie:
     director: str
     year: int
     rating: float
-    watched_by: List[int]
+    watched_by: Optional[List[int]] = field(default_factory=list)

@@ -1,8 +1,8 @@
 '''
 User Datamodel
 '''
-from ast import List
-from dataclasses import dataclass
+from typing import List, Optional
+from dataclasses import dataclass, field
 
 @dataclass
 class User:
@@ -12,4 +12,5 @@ class User:
     id: int
     name: str
     email: str
-    watched_movies: List[int]
+    watched_movies: Optional[List[int]] = field(default_factory=list)
+

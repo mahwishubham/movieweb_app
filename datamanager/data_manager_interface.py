@@ -2,14 +2,14 @@
 Datamanager Interface
 '''
 from abc import ABC, abstractmethod
-from ast import List
+from typing import List
 from schema.movies import Movie
 from schema.user import User
 
 class DataManagerInterface(ABC):
-    '''
+    """
     DataManager Interface
-    '''
+    """
 
     @abstractmethod
     def create_user(self, user: User):
