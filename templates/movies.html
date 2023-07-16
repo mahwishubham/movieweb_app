@@ -2,6 +2,7 @@
 {% block content %}
 {% if movies %}
 <h1>All Movies</h1>
+<button id="addMovie" class="btn btn-primary mb-3">Add New Movie</button>
 <div class="row">
     {% for movie in movies %}
     <div class="col-sm-4">
@@ -12,6 +13,9 @@
                 <p class="card-text">Directed by: {{ movie.director }}</p>
                 <p class="card-text">Year: {{ movie.year }}</p>
                 <p class="card-text">Rating: {{ movie.rating }}</p>
+                <button class="btn btn-primary editMovie" data-movie-id="{{ movie.id }}">Edit</button>
+                <button class="btn btn-primary updateMovie" data-movie-id="{{ movie.id }}" style="display: none;">Update</button>
+                <button class="btn btn-danger deleteMovie" data-movie-id="{{ movie.id }}">Delete</button>
                 {% if movie.imdbID %}
                     <a href="https://www.imdb.com/title/{{ movie.imdbID }}" class="btn btn-primary" target="_blank">View on IMDb</a>
                 {% else %}
@@ -25,4 +29,118 @@
 {% else %}
 <p>No movies found.</p>
 {% endif %}
+
+<!-- Modal -->
+<div class="modal fade" id="movieModal" tabindex="-1" aria-labelledby="movieModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="movieModalLabel">New Movie</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="form-group">
+                <label for="movieTitle">Movie Title</label>
+                <input type="text" class="form-control" id="movieTitle" name="title">
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(document).ready(function(){
+    $("#addMovie").click(function(){
+        // Trigger the Modal Here
+        $("#movieModal").modal('show');
+    });
+
+    $("#movieModal .btn-primary").click(function(){
+        // Get movie details from the form
+        var movieTitle = $("#movieModal input[name='title']").val();
+
+        // Perform AJAX call to add the movie
+        $.ajax({
+            url: '/add_movie',
+            type: 'POST',
+            data: JSON.stringify({title: movieTitle}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            async: true,
+            success: function(msg) {
+                alert(msg.status);
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert("An error occurred: " + status + "\nError message: " + error);
+            }
+        });
+    });
+
+    $(".deleteMovie").click(function(){
+        var movieId = $(this).data('movie-id');
+        // Perform AJAX call to delete the movie
+        $.ajax({
+            url: '/movies/delete_movie/' + movieId,
+            type: 'DELETE',
+            success: function(msg) {
+                alert(msg.status);
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert("An error occurred: " + status + "\nError message: " + error);
+            }
+        });
+    });
+
+    $(".editMovie").click(function(){
+        // Make the fields of the card editable here
+        var cardBody = $(this).closest('.card-body');
+        cardBody.find('h5, p').attr('contenteditable', true);
+        
+        // Show the update button
+        $(this).next('.updateMovie').show();
+    });
+
+    $(".updateMovie").click(function(){
+        var movieId = $(this).data('movie-id');
+
+        // Get movie details from the card
+        var cardBody = $(this).closest('.card-body');
+        var movieName = cardBody.find('h5').text();
+        var movieDirector = cardBody.find('p:eq(0)').text().split(': ')[1];
+        var movieYear = cardBody.find('p:eq(1)').text().split(': ')[1];
+        var movieRating = cardBody.find('p:eq(2)').text().split(': ')[1];
+
+        // Perform AJAX call to update the movie
+        $.ajax({
+            url: '/movies/update_movie/' + movieId,
+            type: 'PUT',
+            data: JSON.stringify({
+                name: movieName,
+                director: movieDirector,
+                year: movieYear,
+                rating: movieRating
+            }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            async: true,
+            success: function(msg) {
+                alert(msg.status);
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert("An error occurred: " + status + "\nError message: " + error);
+            }
+        });
+    });
+});
+</script>
+
 {% endblock %}
