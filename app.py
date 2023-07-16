@@ -30,16 +30,6 @@ def get_users():
     users = data_manager.get_all_users()
     return render_template('users.html', users=users)
 
-@app.route('/movies', methods=['GET'])
-def get_movies():
-    """
-    Endpoint to fetch all the movies.
-    :return: List of all movies
-    """
-
-    movies = data_manager.get_all_movies()
-    return render_template('movies.html', movies=movies)
-
 # @app.route('/users/<int:user_id>', methods=['GET'])
 # def get_user_movies(user_id):
 #     """
@@ -80,6 +70,51 @@ def user_movies_search():
 
     return render_template('user_movies_search.html', error="User not found")
 
+@app.route('/add_user', methods=['POST'])
+def add_user():
+    """
+    Endpoint to add a new user.
+
+    :return: Status of the operation.
+    """
+    user_data = request.get_json()
+    user_data['id'] = uuid.uuid1().int>>64
+    new_user = User(**user_data)
+    data_manager.create_user(new_user)
+    return jsonify({'status': 'User added successfully'})
+
+@app.route('/users/<int:user_id>/add_movie', methods=['POST'])
+def add_movie(user_id):
+    """
+    Endpoint to add a new movie to a user's favorite list.
+
+    :param user_id: The ID of the user.
+    :return: Status of the operation.
+    """
+    movie_data = request.get_json()
+    movie = data_manager.get_movie(movie_data)
+    if not movie:
+        movie = data_manager.omdb(movie_data.get('name'))
+    user = data_manager.get_user(user_id)
+    if movie.id not in user.watched_movies:
+        user.watched_movies.append(movie.id)
+    movie.watched_by.append(user.id)
+    data_manager.update_user(user_id, user.__dict__)
+    data_manager.update_movie(movie.id, movie.__dict__)
+    return jsonify({'status': 'Movie added successfully to user favorites'})
+
+
+@app.route('/movies', methods=['GET'])
+def get_movies():
+    """
+    Endpoint to fetch all the movies.
+    :return: List of all movies
+    """
+
+    movies = data_manager.get_all_movies()
+    return render_template('movies.html', movies=movies)
+
+
 @app.route('/movies/watchers/search', methods=['GET', 'POST'])
 def movie_watchers_search():
     """
@@ -110,18 +145,6 @@ def movie_watchers_search():
     return render_template('movie_watchers_search.html')
 
 
-@app.route('/add_user', methods=['POST'])
-def add_user():
-    """
-    Endpoint to add a new user.
-
-    :return: Status of the operation.
-    """
-    user_data = request.get_json()
-    user_data['id'] = uuid.uuid1().int>>64
-    new_user = User(**user_data)
-    data_manager.create_user(new_user)
-    return jsonify({'status': 'User added successfully'})
 
 @app.route('/add_movie', methods=['POST'])
 def new_movie():
@@ -136,25 +159,6 @@ def new_movie():
     else:
         return jsonify({'status': 'Failed to add a movie'})
 
-@app.route('/users/<int:user_id>/add_movie', methods=['POST'])
-def add_movie(user_id):
-    """
-    Endpoint to add a new movie to a user's favorite list.
-
-    :param user_id: The ID of the user.
-    :return: Status of the operation.
-    """
-    movie_data = request.get_json()
-    movie = data_manager.get_movie(movie_data)
-    if not movie:
-        movie = data_manager.omdb(movie_data.get('name'))
-    user = data_manager.get_user(user_id)
-    if movie.id not in user.watched_movies:
-        user.watched_movies.append(movie.id)
-    movie.watched_by.append(user.id)
-    data_manager.update_user(user_id, user.__dict__)
-    data_manager.update_movie(movie.id, movie.__dict__)
-    return jsonify({'status': 'Movie added successfully to user favorites'})
 
 @app.route('/movies/update_movie/<int:movie_id>', methods=['PUT'])
 def update_movie(movie_id):
@@ -182,6 +186,23 @@ def delete_movie(movie_id):
 
     data_manager.delete_movie(movie_id)
     return jsonify({'status': 'Movie deleted successfully from user favorites'})
+
+
+@app.route('/movies/get_movie/<int:movie_id>', methods=['GET'])
+def get_movie(movie_id):
+    """
+    Endpoint to get a movie by its ID.
+
+    :param movie_id: The ID of the movie.
+    :return: The movie data in JSON format.
+    """
+    movie = data_manager.get_movie({'id': movie_id})
+    if movie:
+        movie = movie.__dict__
+    else:
+        movie = {}
+    return jsonify(movie)
+
 
 @app.errorhandler(404)
 def page_not_found(event):
