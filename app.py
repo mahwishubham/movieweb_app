@@ -62,13 +62,23 @@ def user_movies_search():
     :body user_id: The ID of the user.
     :return: List of the user's favorite movies.
     """
+    user_id = None
+
     if request.method == 'POST':
-        user_id = int(request.form.get('userId'))
-        user = data_manager.get_user(user_id)
-        if user:
-            movies = [data_manager.get_movie({'id': mov_id}) for mov_id in user.watched_movies]
-            return render_template('user_movies_search.html', user=user, movies=movies)
-    return render_template('user_movies_search.html')
+        user_id = request.form.get('userId') or request.json.get('userId')
+    else:
+        user_id = request.args.get('userId')
+    
+    if user_id is None:
+        return render_template('user_movies_search.html', error="User ID is required")
+
+    user_id = int(user_id)
+    user = data_manager.get_user(user_id)
+    if user:
+        movies = [data_manager.get_movie({'id': mov_id}) for mov_id in user.watched_movies]
+        return render_template('user_movies_search.html', user=user, movies=movies)
+
+    return render_template('user_movies_search.html', error="User not found")
 
 @app.route('/movies/watchers/search', methods=['GET', 'POST'])
 def movie_watchers_search():
@@ -159,6 +169,15 @@ def delete_movie(movie_id):
 
     data_manager.delete_movie(movie_id)
     return jsonify({'status': 'Movie deleted successfully from user favorites'})
+
+@app.errorhandler(404)
+def page_not_found(event):
+    '''
+    404 Error Handler
+    '''
+    print(event)
+    return render_template('404.html'), 404
+
 
 if __name__ == '__main__':
     app.run(debug=True)
