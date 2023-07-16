@@ -98,6 +98,7 @@ class JSONDataManager(DataManagerInterface):
         :return: The User object if found, None otherwise.
         '''
         user_data = next((user for user in self.users if user['id'] == user_id), None)
+        print(user_data)
         return User(**user_data) if user_data else None
 
     def update_user(self, user_id: int, new_info: dict):
@@ -156,6 +157,12 @@ class JSONDataManager(DataManagerInterface):
                 break
 
         return Movie(**movie_data) if movie_data else None
+
+    def get_all_movies(self):
+        """
+        :return all movies in the database
+        """
+        return self.movies
 
     def update_movie(self, movie_id: int, new_info: dict):
         '''

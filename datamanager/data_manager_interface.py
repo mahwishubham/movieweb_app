@@ -36,7 +36,7 @@ class DataManagerInterface(ABC):
         ''' Create a new Movie '''
 
     @abstractmethod
-    def get_movie(self, movie_id: int) -> Movie:
+    def get_movie(self, movie: dict) -> Movie:
         ''' Get a Movie by ID '''
 
     @abstractmethod

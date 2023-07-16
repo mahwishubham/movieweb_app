@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Search Movie's Watchers</h1>
+<form method="POST">
+    <div class="form-group">
+        <label for="movieId">Movie ID</label>
+        <input type="number" class="form-control" id="movieId" name="movieId" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+{% if users %}
+<h2>Users who watched {{ movie.name }}</h2>
+<ul class="list-group">
+    {% for user in users %}
+    <li class="list-group-item">{{ user.name }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

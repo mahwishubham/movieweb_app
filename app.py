@@ -1,12 +1,11 @@
 '''
 Flask Movie App
 '''
-
+import uuid
 from flask import Flask, jsonify, request, render_template, redirect
 from datamanager.json_data_manager import JSONDataManager
-from schema.movies import Movie
+# from schema.movies import Movie
 from schema.user import User
-import uuid
 
 app = Flask(__name__)
 
@@ -19,7 +18,7 @@ def home():
 
     :return: A welcome message.
     """
-    return "<h1>Welcome to MovieWeb App!</h1>"
+    return render_template('base.html')
 
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -31,19 +30,62 @@ def get_users():
     users = data_manager.get_all_users()
     return render_template('users.html', users=users)
 
-@app.route('/users/<int:user_id>', methods=['GET'])
-def get_user_movies(user_id):
+@app.route('/movies', methods=['GET'])
+def get_movies():
+    """
+    Endpoint to fetch all the movies.
+    :return: List of all movies
+    """
+
+    movies = data_manager.get_all_movies()
+    return render_template('movies.html', movies=movies)
+
+# @app.route('/users/<int:user_id>', methods=['GET'])
+# def get_user_movies(user_id):
+#     """
+#     Endpoint to fetch a specific user's favorite movies.
+
+#     :param user_id: The ID of the user.
+#     :return: List of the user's favorite movies.
+#     """
+#     user = data_manager.get_user(user_id)
+#     movies = []
+#     for mov_id in user.watched_movies:
+#         movies.append(data_manager.get_movie({'id': mov_id}))
+#     return render_template('user_movies.html', movies=movies, user=user)
+
+@app.route('/users/movies/search', methods=['GET', 'POST'])
+def user_movies_search():
     """
     Endpoint to fetch a specific user's favorite movies.
 
-    :param user_id: The ID of the user.
+    :body user_id: The ID of the user.
     :return: List of the user's favorite movies.
     """
-    user = data_manager.get_user(user_id)
-    movies = []
-    for mov_id in user.watched_movies:
-        movies.append(data_manager.get_movie({'id': mov_id}))
-    return render_template('user_movies.html', movies=movies, user=user)
+    if request.method == 'POST':
+        user_id = int(request.form.get('userId'))
+        user = data_manager.get_user(user_id)
+        if user:
+            movies = [data_manager.get_movie({'id': mov_id}) for mov_id in user.watched_movies]
+            return render_template('user_movies_search.html', user=user, movies=movies)
+    return render_template('user_movies_search.html')
+
+@app.route('/movies/watchers/search', methods=['GET', 'POST'])
+def movie_watchers_search():
+    """
+    Endpoint to fetch a Users watching a specific movies.
+
+    :body movie_id: The ID of the movie.
+    :return: List of the users watching the movie.
+    """
+    if request.method == 'POST':
+        movie_id = request.form.get('movieId')
+        movie = data_manager.get_movie({'id': movie_id})
+        if movie:
+            users = [data_manager.get_user(user_id) for user_id in movie.watched_by]
+            return render_template('movie_watchers_search.html', movie=movie, users=users)
+    return render_template('movie_watchers_search.html')
+
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
@@ -70,8 +112,6 @@ def new_movie():
         return jsonify({'status': 'Movie Added'})
     else:
         return jsonify({'status': 'Failed to add a movie'})
-
-
 
 @app.route('/users/<int:user_id>/add_movie', methods=['POST'])
 def add_movie(user_id):

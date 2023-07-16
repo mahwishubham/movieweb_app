@@ -83,7 +83,7 @@ class ApiRequester(IApiRequester):
             "name": movie_data.get("Title"),
             "year": int(movie_data.get("Year")) or 0,
             "rating": float(movie_data.get("imdbRating")) or 0.0,
-            "poster_url": movie_data.get("Poster") or "",
-            "imdbID": movie_data.get("imdbID")[2:] or "",
+            "poster_url": movie_data.get("Poster") if movie_data.get("Poster") != "N/A" else "",
+            "imdbID": movie_data.get("imdbID") or "",
             "director": movie_data.get("Director") or "",
         }

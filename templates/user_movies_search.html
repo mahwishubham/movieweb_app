@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Search User's Movies</h1>
+<form method="POST">
+    <div class="form-group">
+        <label for="userId">User ID</label>
+        <input type="number" class="form-control" id="userId" name="userId" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+{% if movies %}
+<h2>Movies watched by user {{ user.name }}</h2>
+<div class="row">
+    {% for movie in movies %}
+    <div class="col-sm-4">
+        <div class="card mb-3" style="max-width: 18rem;">
+            <img src="{{ movie.poster_url or url_for('static', filename='default.jpg') }}" class="card-img-top img-fluid" alt="{{ movie.name }}" style="height:200px; object-fit:cover;">
+            <div class="card-body">
+                <h5 class="card-title">{{ movie.name }}</h5>
+                <p class="card-text">Directed by: {{ movie.director }}</p>
+                <p class="card-text">Year: {{ movie.year }}</p>
+                <p class="card-text">Rating: {{ movie.rating }}</p>
+                {% if movie.imdbID %}
+                    <a href="https://www.imdb.com/title/{{ movie.imdbID }}" class="btn btn-primary" target="_blank">View on IMDb</a>
+                {% else %}
+                    <p>No IMDb link available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
