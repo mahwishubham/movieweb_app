@@ -90,7 +90,20 @@ def movie_watchers_search():
     """
     if request.method == 'POST':
         movie_id = request.form.get('movieId')
-        movie = data_manager.get_movie({'id': movie_id})
+        movie_name = request.form.get('movieName')
+        imdb_id = request.form.get('imdbID')
+
+        movie_search_params = {}
+
+        if movie_id:
+            movie_search_params['id'] = movie_id
+        elif movie_name:
+            movie_search_params['name'] = movie_name
+        elif imdb_id:
+            movie_search_params['imdbID'] = imdb_id
+
+        movie = data_manager.get_movie(movie_search_params)
+
         if movie:
             users = [data_manager.get_user(user_id) for user_id in movie.watched_by]
             return render_template('movie_watchers_search.html', movie=movie, users=users)
