@@ -2,9 +2,16 @@
 This is Json Datamanager
 '''
 import json
+import os
+from dotenv import load_dotenv
 from datamanager.data_manager_interface import DataManagerInterface
 from schema.movies import Movie
 from schema.user import User
+from api_requester import  ApiRequester
+
+load_dotenv()  # load environment variables from .env file
+API_KEY = os.getenv("API_KEY")  # read the API key from the .env file
+BASE_URL = "http://www.omdbapi.com"
 
 class JSONDataManager(DataManagerInterface):
     '''
@@ -128,14 +135,26 @@ class JSONDataManager(DataManagerInterface):
         self.movies.append(movie.__dict__)
         self.save_data()
 
-    def get_movie(self, movie_id: int) -> Movie:
+    def get_movie(self, movie: dict) -> Movie:
         '''
         Retrieve a Movie by ID.
 
-        :param movie_id: The ID of the Movie to be retrieved.
+        :param movie: search params of movie.
         :return: The Movie object if found, None otherwise.
         '''
-        movie_data = next((movie for movie in self.movies if movie['id'] == movie_id), None)
+        search, key = None, None
+        key_priority = ['id', 'name', 'imdbID']
+        for k in key_priority:
+            if movie.get(k):
+                search, key = movie[k], k
+                break
+        movie_data = None
+
+        for movie in self.movies:
+            if movie.get(key) == search:
+                movie_data = movie
+                break
+
         return Movie(**movie_data) if movie_data else None
 
     def update_movie(self, movie_id: int, new_info: dict):
@@ -148,7 +167,6 @@ class JSONDataManager(DataManagerInterface):
         movie = next((movie for movie in self.movies if movie['id'] == movie_id), None)
         if movie:
             movie.update(new_info)
-            print(movie, new_info)
             self.save_data()
 
     def delete_movie(self, movie_id: int):
@@ -164,4 +182,24 @@ class JSONDataManager(DataManagerInterface):
                 user['watched_movies'] = [mid for mid in user['watched_movies'] if mid != movie_id]
 
         self.save_data()
+
+    def omdb(self, title: str):
+        '''
+        Seacrh of movie on omdb and return movie data
+        :param title:
+        :return: movie data
+        '''
+
+        api_requester = ApiRequester(BASE_URL, API_KEY)
+        for movie in self.movies:
+            if movie.get('name') == title:
+                print(f"Movie {title} already exists!")
+                return
+        movie_data = api_requester.request_movie_data(title)
+        if not movie_data or movie_data.get("Response") == "False":
+            print(f"Error: Movie {title} not found.")
+            return
+        movie = Movie(**api_requester.extract_data(movie_data))
+        self.create_movie(movie)
+        return movie
 

@@ -14,4 +14,6 @@ class Movie:
     director: str
     year: int
     rating: float
+    poster_url: str = ""
+    imdbID: str = ""
     watched_by: Optional[List[int]] = field(default_factory=list)

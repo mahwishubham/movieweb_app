@@ -7,7 +7,14 @@
     <h1>{{ user.name }}'s Favorite Movies</h1>
     <ul>
         {% for movie in movies %}
-            <li>{{ movie.title }}</li>
+            <div>
+                <span>{{ movie.name }}</span> </br>
+                <span>{{ movie.director}}</span></br>
+                <span>{{ movie.director}}</span></br>
+                <span>{{ movie.director}}</span></br>
+                <img src={{ movie.poster_url}} /></br>
+                <span>{{movie.imdbID}}</span></br>
+            </div>
         {% endfor %}
     </ul>
     <a href="/users">Back to Users List</a>
