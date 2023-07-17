@@ -4,7 +4,7 @@ Flask Movie App
 import uuid
 from flask import Flask, jsonify, request, render_template, redirect
 from datamanager.json_data_manager import JSONDataManager
-# from schema.movies import Movie
+from schema.movies import Movie
 from schema.user import User
 
 app = Flask(__name__)
@@ -92,7 +92,10 @@ def add_movie(user_id):
     :return: Status of the operation.
     """
     movie_data = request.get_json()
-    movie = data_manager.get_movie(movie_data)
+    if movie_data.get('id'):
+        movie = Movie(**movie_data)
+    else:
+        movie = data_manager.get_movie(movie_data)
     if not movie:
         movie = data_manager.omdb(movie_data.get('name'))
     user = data_manager.get_user(user_id)
