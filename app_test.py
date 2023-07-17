@@ -1,20 +1,63 @@
-# import unittest
-# from app import app, data_manager
-# from flask import json
+import requests
+import json
 
-# class RoutesTestCase(unittest.TestCase):
+def test_add_user():
+    payload = {
+        'name': 'Mahwish',
+        'email': 'Mahwish@gmail.com'
+    }
+    r = requests.post('http://localhost:5000/add_user', json=payload)
+    assert r.status_code == 200
+    assert json.loads(r.text)['status'] == 'User added successfully'
 
-#     def setUp(self):
-#         self.app = app
-#         self.client = self.app.test_client()
-#         self.app.testing = True
 
-#     def test_users_route(self):
-#         response = self.client.get('/users')
-#         data = json.loads(response.get_data())
-#         expected_data = data_manager.list_all_users()
-#         self.assertEqual(response.status_code, 200)
-#         self.assertEqual(data, expected_data)
+def test_add_movie_to_user_watch_list():
+    user_id = "11754101226508521966" # The actual user id needs to be used here
+    payload = {
+        'name': 'Spiderman'
+    }
+    r = requests.post(f'http://localhost:5000/users/{user_id}/add_movie', json=payload)
+    assert r.status_code == 200
+    assert json.loads(r.text)['status'] == 'Movie added successfully to user favorites'
 
-# if __name__ == '__main__':
-#     unittest.main()
+
+def test_update_movie():
+    movie_id = "1472740360802865646" # The actual movie id needs to be used here
+    payload = {
+        'rating': 5.8
+    }
+    r = requests.put(f'http://localhost:5000/movies/update_movie/{movie_id}', json=payload)
+    assert r.status_code == 200
+    assert json.loads(r.text)['status'] == 'Movie updated successfully'
+
+
+def test_delete_movie():
+    movie_id = "1472740360802865646" # The actual movie id needs to be used here
+    r = requests.delete(f'http://localhost:5000/movies/delete_movie/{movie_id}')
+    assert r.status_code == 200
+    assert json.loads(r.text)['status'] == 'Movie deleted successfully from user favorites'
+
+
+def test_add_movie():
+    payload = {
+        'title': 'Batman'
+    }
+    r = requests.post('http://localhost:5000/add_movie', json=payload)
+    assert r.status_code == 200
+    assert json.loads(r.text)['status'] == 'Movie Added'
+
+
+def test_list_users():
+    r = requests.get('http://localhost:5000/users')
+    assert r.status_code == 200
+
+
+def test_list_user_watch_list():
+    user_id = "11754101226508521966" # The actual user id needs to be used here
+    r = requests.get(f'http://localhost:5000/users/{user_id}')
+    assert r.status_code == 200
+
+
+def test_home_page():
+    r = requests.get('http://localhost:5000/')
+    assert r.status_code == 200
