@@ -94,19 +94,18 @@ $(document).ready(function(){
         dataType: 'json',
         async: true,
         success: function(movieInfo) {
-            // Open the modal
             $("#watchMovieModal").modal('show');
 
             // When "Watch" button in the modal is clicked
             $("#watchMovieBtn").click(function(){
                 // Get the user ID from the form
                 var userId = $("#watchMovieModal input[name='userId']").val();
-
+                var data = {"id" : movieInfo.id }
                 // Perform AJAX call to add the movie to the user's watch list
                 $.ajax({
                     url: '/users/' + userId + '/add_movie',
                     type: 'POST',
-                    data: JSON.stringify(movieInfo),
+                    data: JSON.stringify(data),
                     contentType: 'application/json; charset=utf-8',
                     dataType: 'json',
                     async: true,
