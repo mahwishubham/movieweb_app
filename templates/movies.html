@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-{% if movies %}
 <h1>All Movies</h1>
 <button id="addMovie" class="btn btn-primary mb-3">Add New Movie</button>
+{% if movies %}
 <div class="row">
     {% for movie in movies %}
     <div class="col-sm-4">
@@ -82,52 +82,46 @@
 
 <script>
 $(document).ready(function(){
-
+    var movieId;
     $(".watchMovie").click(function(){
-    var movieId = $(this).data('movie-id');
+        movieId = $(this).data('movie-id');
+        $("#watchMovieModal").modal('show');
+    });
+    
+    $("#watchMovieModal .btn-secondary").click(function () {
+      // Hide the modal
+      $("#watchMovieModal").modal('hide');
+    });
 
-    // Get movie data from the server
-    $.ajax({
-        url: '/movies/get_movie/' + movieId,
-        type: 'GET',
-        contentType: 'application/json; charset=utf-8',
-        dataType: 'json',
-        async: true,
-        success: function(movieInfo) {
-            $("#watchMovieModal").modal('show');
-
-            // When "Watch" button in the modal is clicked
-            $("#watchMovieBtn").click(function(){
-                // Get the user ID from the form
-                var userId = $("#watchMovieModal input[name='userId']").val();
-                var data = {"id" : movieInfo.id }
-                // Perform AJAX call to add the movie to the user's watch list
-                $.ajax({
-                    url: '/users/' + userId + '/add_movie',
-                    type: 'POST',
-                    data: JSON.stringify(data),
-                    contentType: 'application/json; charset=utf-8',
-                    dataType: 'json',
-                    async: true,
-                    success: function(msg) {
-                        alert(msg.status);
-                        location.reload();
-                    },
-                    error: function(xhr, status, error) {
-                        alert("An error occurred: " + status + "\nError message: " + error);
-                    }
-                });
-            });
-        },
-        error: function(xhr, status, error) {
-            alert("An error occurred when trying to fetch movie data: " + status + "\nError message: " + error);
-        }
+    $("#watchMovieModal .btn-primary").click(function(){
+        // Perform AJAX call to add the movie to the user's watch list
+        userId =  $("#watchMovieModal input[name='userId']").val();
+        console.log(userId)
+        $.ajax({
+            url: '/users/' + userId + '/add_movie',
+            type: 'POST',
+            data: JSON.stringify({id: movieId}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            async: true,
+            success: function(msg) {
+                alert(msg.status);
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert("An error occurred: " + status + "\nError message: " + error);
+            }        
         });
     });
 
     $("#addMovie").click(function(){
         // Trigger the Modal Here
         $("#movieModal").modal('show');
+    });
+
+    $("#movieModal .btn-secondary").click(function () {
+      // Hide the modal
+      $("#movieModal").modal('hide');
     });
 
     $("#movieModal .btn-primary").click(function(){
@@ -150,6 +144,7 @@ $(document).ready(function(){
                 alert("An error occurred: " + status + "\nError message: " + error);
             }
         });
+        $("#movieModal").modal('hide');
     });
 
     $(".deleteMovie").click(function(){

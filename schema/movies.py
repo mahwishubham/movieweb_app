@@ -16,4 +16,4 @@ class Movie:
     rating: float
     poster_url: str = ""
     imdbID: str = ""
-    watched_by: Optional[List[int]] = field(default_factory=list)
+    # watched_by: Optional[List[int]] = field(default_factory=list)

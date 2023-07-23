@@ -28,16 +28,14 @@ Here's an example of the proposed structure:
     "name": "Inception",
     "director": "Christopher Nolan",
     "year": 2010,
-    "rating": 8.8,
-    "watched_by": [1]
+    "rating": 8.8
   },
   {
     "id": 2,
     "name": "The Dark Knight",
     "director": "Christopher Nolan",
     "year": 2008,
-    "rating": 9.0,
-    "watched_by": [1]
+    "rating": 9.0
   }
 ]
 ```

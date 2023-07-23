@@ -11,38 +11,42 @@ app = Flask(__name__)
 
 data_manager = JSONDataManager('users.json', 'movies.json')
 
+# [GREEN]
 @app.route('/')
 def home():
     """
-    Home route which acts as the landing page of our MovieWeb App.
-
+    This will be the home page of our application.
+    We have the creative liberty to design this as a simple welcome screen or a more elaborate dashboard.
     :return: A welcome message.
     """
     return render_template('base.html')
 
+# [GREEN]
 @app.route('/users', methods=['GET'])
 def get_users():
     """
-    Endpoint to fetch all the users.
+    This route will present a list of all users registered in our MovieWeb App.
 
     :return: List of all users.
     """
     users = data_manager.get_all_users()
     return render_template('users.html', users=users)
 
-# @app.route('/users/<int:user_id>', methods=['GET'])
-# def get_user_movies(user_id):
-#     """
-#     Endpoint to fetch a specific user's favorite movies.
+@app.route('/users/<int:user_id>', methods=['GET'])
+def get_user_movies(user_id):
+    """
+    This route will exhibit a specific user’s list of favorite movies.
+    We will use the <user_id> in the route to fetch the appropriate user’s movies.
 
-#     :param user_id: The ID of the user.
-#     :return: List of the user's favorite movies.
-#     """
-#     user = data_manager.get_user(user_id)
-#     movies = []
-#     for mov_id in user.watched_movies:
-#         movies.append(data_manager.get_movie({'id': mov_id}))
-#     return render_template('user_movies.html', movies=movies, user=user)
+    :param user_id: The ID of the user.
+    :return: List of the user's favorite movies.
+    """
+    user = data_manager.get_user(user_id)
+    movies = []
+    for mov_id in user.watched_movies:
+        # getting all the movies info from movies datastore
+        movies.append(data_manager.get_movie({'id': mov_id}))
+    return render_template('user_movies.html', movies=movies, user=user)
 
 @app.route('/users/movies/search', methods=['GET', 'POST'])
 def user_movies_search():
@@ -70,6 +74,7 @@ def user_movies_search():
 
     return render_template('user_movies_search.html', error="User not found")
 
+# [GREEN]
 @app.route('/add_user', methods=['POST'])
 def add_user():
     """
@@ -86,24 +91,34 @@ def add_user():
 @app.route('/users/<int:user_id>/add_movie', methods=['POST'])
 def add_movie(user_id):
     """
-    Endpoint to add a new movie to a user's favorite list.
+    This route will display a form to add a new movie to a user’s list of favorite movies.
 
     :param user_id: The ID of the user.
+    :body: {'id': 'movie_id if already exists in db' } or {'name': 'Movie Name from OMDB list'} or {'imdbID': 'IMDB ID of a movie'}
     :return: Status of the operation.
     """
-    movie_data = request.get_json()
-    if movie_data.get('id'):
-        movie = Movie(**movie_data)
-    else:
-        movie = data_manager.get_movie(movie_data)
+
+    # look if movie already exists in movies datastore
+    req = request.get_json()
+    print(req)
+    movie = data_manager.get_movie(req)
     if not movie:
-        movie = data_manager.omdb(movie_data.get('name'))
+        if req.get('name'):
+            # if movie doesnot exists then add the movie to datastore
+            movie = data_manager.omdb(req.get('name'))
+            if not movie:
+                return jsonify({'status': f"Movie {req.get('name')} not found in OMDB list."})
+        else:
+            return jsonify({'status': "Please provide movie name from omdb \{'name': 'Spiderman'\}"})
+    # look for the user in user datastore
     user = data_manager.get_user(user_id)
+    if not user:
+        return jsonify({'status': f"User with user id {user_id} not found"})
     if movie.id not in user.watched_movies:
         user.watched_movies.append(movie.id)
-    movie.watched_by.append(user.id)
+
+    # update the user datastore with the new movie
     data_manager.update_user(user_id, user.__dict__)
-    data_manager.update_movie(movie.id, movie.__dict__)
     return jsonify({'status': 'Movie added successfully to user favorites'})
 
 

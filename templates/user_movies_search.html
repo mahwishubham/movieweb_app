@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Search User's Movies</h1>
-<form method="POST">
+<h1>Your Favorite ❤️ Movies List</h1>
+<form id="addMovieForm" method="POST" action="">
     <div class="form-group">
-        <label for="userId">User ID</label>
-        <input type="number" class="form-control" id="userId" name="userId" required>
+        <label for="movieName">Movie Name</label>
+        <input type="text" class="form-control" id="movieName" name="movieName" required>
     </div>
-    <button type="submit" class="btn btn-primary">Search</button>
+    <button type="submit" class="btn btn-primary">Add Movie To Watch List</button>
 </form>
 
 {% if movies %}
@@ -33,4 +33,65 @@
     {% endfor %}
 </div>
 {% endif %}
+
+<script>
+    // Function to get the value of a query parameter from the URL
+    function getQueryParameter(name) {
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const value = urlSearchParams.get(name);
+        return decodeURIComponent(value); // Decode the URL-encoded value to get the normal string
+    }
+
+    $(document).ready(function() {
+        // Get the userId from the URL query parameter
+        const userId = getQueryParameter("userId");
+
+        // Update the form's action attribute with the userId
+        const addMovieForm = $("#addMovieForm");
+        addMovieForm.attr("action", `/users/${userId}/add_movie`);
+      
+
+        // Submit the form using Ajax
+        addMovieForm.submit(function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Get the value of the input field
+            const movieName = $("#movieName").val();
+
+            // Check if the input field is not empty
+            if (!movieName) {
+                alert("Please enter a movie name.");
+                return;
+            }
+
+            // Create an object to hold the form data
+            const formData = {
+                name: movieName
+                // Add more fields here if needed
+            };
+
+            const jsonData = JSON.stringify(formData);
+
+            // Send the form data using Ajax
+            $.ajax({
+                type: "POST",
+                url: addMovieForm.attr("action"),
+                contentType: "application/json", // Set the content type to JSON
+                data: jsonData,
+                success: function(response) {
+                    // Handle the API response if needed
+                    console.log("Form submitted successfully:", response);
+                    location.reload()
+                },
+                error: function(error) {
+                    // Handle the API error if needed
+                    console.error("Error submitting form:", error);
+                    alert("Failed to add movie. Please try again.");
+                }
+            });
+        });
+    });
+</script>
+
+
 {% endblock %}

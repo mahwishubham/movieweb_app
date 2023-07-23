@@ -152,7 +152,7 @@ class JSONDataManager(DataManagerInterface):
         movie_data = None
 
         for movie in self.movies:
-            if movie.get(key) == search:
+            if str(movie.get(key)) == str(search):
                 movie_data = movie
                 break
 
