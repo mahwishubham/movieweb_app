@@ -67,30 +67,24 @@ class JSONDataManager(DataManagerInterface):
         return None
         # Total Time Complexity Is: T(max(n + m)) which is still linear
 
-    def delete_user_movie(self, user_id: int, movie_id: int):
+        def delete_user_movie(self, user_id: int, movie_id: int):
         ''' Delete a Movie by ID.
         :param movie_id: The ID of the Movie to be deleted.
         :param user_id: The ID of user from whose list we need to remove movie
         '''
         try:
-            # Find the user with the given user_id
-            for user in self.users:
-                if str(user['id']) == str(user_id):
-                    # Check if the movie_id exists in the user's watched_movies list
-                    if str(movie_id) in str(user['watched_movies']):
-                        # Remove the movie_id from the user's watched_movies list
-                        user['watched_movies'].remove(movie_id)
-                        # Save the updated data to the JSON file
-                        self.save_data()
-                        return True  # Successfully deleted the movie_id
-                    else:
-                        print("If movie_id is not found in the user's watched_movies list")
-                        return False  # Movie not found in user's watched list
+            user = next((user for user in self.users if str(user['id']) == str(user_id)), None)
+            if user:
+                watched_movies = [mov_id for mov_id in user.get('watched_movies') if str(mov_id) != str(movie_id) ]
+                # print("-------WATCHEDMOVIE------------", watched_movies)
+                user.update({'watched_movies': watched_movies})
+                self.save_data()
+                return True
             else:
-                print("If user with the given user_id is not found")
-                return False  # User not found
+                print("USER NOT FOUND")
+                return False
         except Exception as e:
-            print("An error occurred while deleting the movie_id")
+            print("An error occurred while deleting the movie_id", e)
             return False  # An error occurred while deleting the movie_id
 
     def create_user(self, user: User):
