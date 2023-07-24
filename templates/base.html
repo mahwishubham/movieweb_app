@@ -22,14 +22,12 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('get_movies') }}">Movies</a>
             </li>
-            <!-- <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('user_movies_search') }}">My Movies</a>
-            </li> -->
         </ul>
     </div>
 </nav>
 <div class="container">
-    {% block content %}{% endblock %}
+    {% block content %}
+    {% endblock %}
 </div>
 </body>
 </html>

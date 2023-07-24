@@ -19,7 +19,7 @@ def home():
     We have the creative liberty to design this as a simple welcome screen or a more elaborate dashboard.
     :return: A welcome message.
     """
-    return render_template('base.html')
+    return render_template('home.html')
 
 # [GREEN]
 @app.route('/users', methods=['GET'])
