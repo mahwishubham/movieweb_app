@@ -128,6 +128,15 @@ def add_user():
     data_manager.create_user(new_user)
     return jsonify({'status': 'User added successfully'})
 
+@app.route('/delete_user', methods=['POST'])
+def delete_user():
+    """
+    Endpoint to remove a user
+    :return: Status of the operation
+    """
+    
+    return jsonify({'status': 'User deleted successfully'})
+
 @app.route('/movies', methods=['GET'])
 def get_movies():
     """

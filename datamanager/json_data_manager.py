@@ -67,7 +67,7 @@ class JSONDataManager(DataManagerInterface):
         return None
         # Total Time Complexity Is: T(max(n + m)) which is still linear
 
-        def delete_user_movie(self, user_id: int, movie_id: int):
+    def delete_user_movie(self, user_id: int, movie_id: int):
         ''' Delete a Movie by ID.
         :param movie_id: The ID of the Movie to be deleted.
         :param user_id: The ID of user from whose list we need to remove movie
