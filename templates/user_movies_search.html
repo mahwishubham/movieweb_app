@@ -22,6 +22,7 @@
                 <p class="card-text">Directed by: {{ movie.director }}</p>
                 <p class="card-text">Year: {{ movie.year }}</p>
                 <p class="card-text">Rating: {{ movie.rating }}</p>
+                <button class="btn btn-danger deleteMovie m-2" data-movie-id="{{ movie.id }}">Delete</button>
                 {% if movie.imdbID %}
                     <a href="https://www.imdb.com/title/{{ movie.imdbID }}" class="btn btn-primary" target="_blank">View on IMDb</a>
                 {% else %}
@@ -45,6 +46,27 @@
     $(document).ready(function() {
         // Get the userId from the URL query parameter
         const userId = getQueryParameter("userId");
+        
+        $(".deleteMovie").click(function() {
+            const movieId = $(this).data('movie-id');
+            console.log('Movie ID:', movieId);
+            console.log('User ID: ', userId);
+
+            $.ajax({
+                url: '/users/'+ userId +'/delete_movie/' + movieId,
+                type: 'DELETE',
+                success: function(msg) {
+                    console.log('Success response:', msg);
+                    alert(msg.status);
+                    location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error response:', status, error);
+                    alert("An error occurred: " + status + "\nError message: " + error);
+                }
+            });
+        });
+
 
         // Update the form's action attribute with the userId
         const addMovieForm = $("#addMovieForm");

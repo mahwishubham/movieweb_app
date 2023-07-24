@@ -74,20 +74,6 @@ def user_movies_search():
 
     return render_template('user_movies_search.html', error="User not found")
 
-# [GREEN]
-@app.route('/add_user', methods=['POST'])
-def add_user():
-    """
-    Endpoint to add a new user.
-
-    :return: Status of the operation.
-    """
-    user_data = request.get_json()
-    user_data['id'] = uuid.uuid1().int>>64
-    new_user = User(**user_data)
-    data_manager.create_user(new_user)
-    return jsonify({'status': 'User added successfully'})
-
 @app.route('/users/<int:user_id>/add_movie', methods=['POST'])
 def add_movie(user_id):
     """
@@ -100,7 +86,6 @@ def add_movie(user_id):
 
     # look if movie already exists in movies datastore
     req = request.get_json()
-    print(req)
     movie = data_manager.get_movie(req)
     if not movie:
         if req.get('name'):
@@ -121,6 +106,27 @@ def add_movie(user_id):
     data_manager.update_user(user_id, user.__dict__)
     return jsonify({'status': 'Movie added successfully to user favorites'})
 
+@app.route('/users/<user_id>/delete_movie/<movie_id>', methods=['DELETE'])
+def delete_movie(user_id, movie_id):
+    status = data_manager.delete_user_movie(user_id, movie_id)
+    if status:
+        return jsonify({'status': 'Movie deleted successfully from your favorites list.'})
+    else:
+        return jsonify({'status': f"Movie deletion failed. For User {user_id} and Movie {movie_id}"})
+
+
+@app.route('/add_user', methods=['POST'])
+def add_user():
+    """
+    Endpoint to add a new user.
+
+    :return: Status of the operation.
+    """
+    user_data = request.get_json()
+    user_data['id'] = uuid.uuid1().int>>64
+    new_user = User(**user_data)
+    data_manager.create_user(new_user)
+    return jsonify({'status': 'User added successfully'})
 
 @app.route('/movies', methods=['GET'])
 def get_movies():
@@ -131,38 +137,6 @@ def get_movies():
 
     movies = data_manager.get_all_movies()
     return render_template('movies.html', movies=movies)
-
-
-@app.route('/movies/watchers/search', methods=['GET', 'POST'])
-def movie_watchers_search():
-    """
-    Endpoint to fetch a Users watching a specific movies.
-
-    :body movie_id: The ID of the movie.
-    :return: List of the users watching the movie.
-    """
-    if request.method == 'POST':
-        movie_id = request.form.get('movieId')
-        movie_name = request.form.get('movieName')
-        imdb_id = request.form.get('imdbID')
-
-        movie_search_params = {}
-
-        if movie_id:
-            movie_search_params['id'] = movie_id
-        elif movie_name:
-            movie_search_params['name'] = movie_name
-        elif imdb_id:
-            movie_search_params['imdbID'] = imdb_id
-
-        movie = data_manager.get_movie(movie_search_params)
-
-        if movie:
-            users = [data_manager.get_user(user_id) for user_id in movie.watched_by]
-            return render_template('movie_watchers_search.html', movie=movie, users=users)
-    return render_template('movie_watchers_search.html')
-
-
 
 @app.route('/add_movie', methods=['POST'])
 def new_movie():
@@ -176,7 +150,6 @@ def new_movie():
         return jsonify({'status': 'Movie Added'})
     else:
         return jsonify({'status': 'Failed to add a movie'})
-
 
 @app.route('/movies/update_movie/<int:movie_id>', methods=['PUT'])
 def update_movie(movie_id):
@@ -192,19 +165,6 @@ def update_movie(movie_id):
         return jsonify({'status': 'Movie Not Found!'})
     data_manager.update_movie(movie_id, res)
     return jsonify({'status': 'Movie updated successfully'})
-
-@app.route('/movies/delete_movie/<int:movie_id>', methods=['DELETE'])
-def delete_movie(movie_id):
-    """
-    Endpoint to delete a specific movie from a user's favorite list.
-
-    :param movie_id: The ID of the movie.
-    :return: Status of the operation.
-    """
-
-    data_manager.delete_movie(movie_id)
-    return jsonify({'status': 'Movie deleted successfully from user favorites'})
-
 
 @app.route('/movies/get_movie/<int:movie_id>', methods=['GET'])
 def get_movie(movie_id):

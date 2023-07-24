@@ -67,19 +67,31 @@ class JSONDataManager(DataManagerInterface):
         return None
         # Total Time Complexity Is: T(max(n + m)) which is still linear
 
-    def update_user_movie(self, user_id: int, movie_id: int, new_info: dict):
+    def delete_user_movie(self, user_id: int, movie_id: int):
+        ''' Delete a Movie by ID.
+        :param movie_id: The ID of the Movie to be deleted.
+        :param user_id: The ID of user from whose list we need to remove movie
         '''
-            This method is used to updated user movies list
-        '''
-        # Update the details of a movie for a given user
-        movie = next((movie for movie in self.movies if movie['id'] == movie_id), None)
-        if movie is not None and user_id in movie['watched_by']:
-            print(movie, new_info)
-            movie.update(new_info)
-            print(movie)
-            self.save_data()
-            return True
-        return False
+        try:
+            # Find the user with the given user_id
+            for user in self.users:
+                if str(user['id']) == str(user_id):
+                    # Check if the movie_id exists in the user's watched_movies list
+                    if str(movie_id) in str(user['watched_movies']):
+                        # Remove the movie_id from the user's watched_movies list
+                        user['watched_movies'].remove(movie_id)
+                        # Save the updated data to the JSON file
+                        self.save_data()
+                        return True  # Successfully deleted the movie_id
+                    else:
+                        print("If movie_id is not found in the user's watched_movies list")
+                        return False  # Movie not found in user's watched list
+            else:
+                print("If user with the given user_id is not found")
+                return False  # User not found
+        except Exception as e:
+            print("An error occurred while deleting the movie_id")
+            return False  # An error occurred while deleting the movie_id
 
     def create_user(self, user: User):
         '''
@@ -120,11 +132,6 @@ class JSONDataManager(DataManagerInterface):
         :param user_id: The ID of the User to be deleted.
         '''
         self.users = [user for user in self.users if user['id'] != user_id]
-        # Find user_id in all movies and delete them
-        for movie in self.movies:
-            if movie['watched_by'] is not None and user_id in movie['watched_by']:
-                movie['watched_by'] = [uid for uid in movie['watched_by'] if uid != user_id]
-
         self.save_data()
 
     def create_movie(self, movie: Movie):
@@ -176,19 +183,19 @@ class JSONDataManager(DataManagerInterface):
             movie.update(new_info)
             self.save_data()
 
-    def delete_movie(self, movie_id: int):
-        '''
-        Delete a Movie by ID.
+    # def delete_movie(self, movie_id: int):
+    #     '''
+    #     Delete a Movie by ID.
 
-        :param movie_id: The ID of the Movie to be deleted.
-        '''
-        self.movies = [movie for movie in self.movies if movie['id'] != movie_id]
-        # Find movie_id in all users and delete them
-        for user in self.users:
-            if user['watched_movies'] is not None and movie_id in user['watched_movies']:
-                user['watched_movies'] = [mid for mid in user['watched_movies'] if mid != movie_id]
+    #     :param movie_id: The ID of the Movie to be deleted.
+    #     '''
+    #     self.movies = [movie for movie in self.movies if movie['id'] != movie_id]
+    #     # Find movie_id in all users and delete them
+    #     for user in self.users:
+    #         if user['watched_movies'] is not None and movie_id in user['watched_movies']:
+    #             user['watched_movies'] = [mid for mid in user['watched_movies'] if mid != movie_id]
 
-        self.save_data()
+    #     self.save_data()
 
     def omdb(self, title: str):
         '''

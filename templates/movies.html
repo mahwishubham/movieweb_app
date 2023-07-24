@@ -16,7 +16,7 @@
                 <button class="btn btn-primary watchMovie m-2" data-movie-id="{{ movie.id }}">Watch</button>
                 <button class="btn btn-primary editMovie m-2" data-movie-id="{{ movie.id }}">Edit</button>
                 <button class="btn btn-primary updateMovie m-2" data-movie-id="{{ movie.id }}" style="display: none;">Update</button>
-                <button class="btn btn-danger deleteMovie m-2" data-movie-id="{{ movie.id }}">Delete</button>
+                <!-- <button class="btn btn-danger deleteMovie m-2" data-movie-id="{{ movie.id }}">Delete</button> -->
                 {% if movie.imdbID %}
                     <a href="https://www.imdb.com/title/{{ movie.imdbID }}" class="btn btn-primary" target="_blank">View on IMDb</a>
                 {% else %}
@@ -145,22 +145,6 @@ $(document).ready(function(){
             }
         });
         $("#movieModal").modal('hide');
-    });
-
-    $(".deleteMovie").click(function(){
-        var movieId = $(this).data('movie-id');
-        // Perform AJAX call to delete the movie
-        $.ajax({
-            url: '/movies/delete_movie/' + movieId,
-            type: 'DELETE',
-            success: function(msg) {
-                alert(msg.status);
-                location.reload();
-            },
-            error: function(xhr, status, error) {
-                alert("An error occurred: " + status + "\nError message: " + error);
-            }
-        });
     });
 
     $(".editMovie").click(function(){

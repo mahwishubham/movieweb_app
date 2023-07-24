@@ -43,13 +43,18 @@ class DataManagerInterface(ABC):
     def update_movie(self, movie_id: int, new_info: dict):
         ''' Update a Movie by ID '''
 
-    @abstractmethod
-    def delete_movie(self, movie_id: int):
-        ''' Delete a Movie by ID '''
+    # @abstractmethod
+    # def delete_movie(self, movie_id: int):
+    #     ''' Delete a Movie by ID '''
 
     @abstractmethod
     def get_user_movies(self, user_id: int):
         '''
         This method should return a list/dictionary of movies for the given user.
         Each movie should be a dictionary with details about the movie.
+        '''
+    @abstractmethod
+    def delete_user_movie(self, user_id: int, movie_id: int):
+        '''
+        This will delete a movie from fav list of user
         '''
