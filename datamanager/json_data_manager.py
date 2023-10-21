@@ -177,20 +177,6 @@ class JSONDataManager(DataManagerInterface):
             movie.update(new_info)
             self.save_data()
 
-    # def delete_movie(self, movie_id: int):
-    #     '''
-    #     Delete a Movie by ID.
-
-    #     :param movie_id: The ID of the Movie to be deleted.
-    #     '''
-    #     self.movies = [movie for movie in self.movies if movie['id'] != movie_id]
-    #     # Find movie_id in all users and delete them
-    #     for user in self.users:
-    #         if user['watched_movies'] is not None and movie_id in user['watched_movies']:
-    #             user['watched_movies'] = [mid for mid in user['watched_movies'] if mid != movie_id]
-
-    #     self.save_data()
-
     def omdb(self, title: str):
         '''
         Seacrh of movie on omdb and return movie data

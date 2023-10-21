@@ -1,15 +1,31 @@
 '''
 Flask Movie App
 '''
-import uuid
-from flask import Flask, jsonify, request, render_template, redirect
-from datamanager.json_data_manager import JSONDataManager
-from schema.movies import Movie
+import os
+from flask import Flask, render_template, jsonify, request
+from schema import db
+from dotenv import load_dotenv
+from datamanager.sql_data_manager import SQLDataManager
 from schema.user import User
 
-app = Flask(__name__)
 
-data_manager = JSONDataManager('users.json', 'movies.json')
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////workspaces/movieweb_app/data/movies123.sqlite'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize the db with the Flask app
+db.init_app(app)
+
+# Pushes an application context so we can create our tables.
+# This is necessary because Flask uses context-bound operations.
+with app.app_context():
+    db.create_all()  # Creates all tables based on the models defined.
+
+data_manager = SQLDataManager()
+
 
 # [GREEN]
 @app.route('/')
@@ -34,18 +50,11 @@ def get_users():
 
 @app.route('/users/<int:user_id>', methods=['GET'])
 def get_user_movies(user_id):
-    """
-    This route will exhibit a specific user’s list of favorite movies.
-    We will use the <user_id> in the route to fetch the appropriate user’s movies.
-
-    :param user_id: The ID of the user.
-    :return: List of the user's favorite movies.
-    """
     user = data_manager.get_user(user_id)
-    movies = []
-    for mov_id in user.watched_movies:
-        # getting all the movies info from movies datastore
-        movies.append(data_manager.get_movie({'id': mov_id}))
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    movies = user.watched_movies  # This already gives you a list of Movie objects
     return render_template('user_movies.html', movies=movies, user=user)
 
 @app.route('/users/movies/search', methods=['GET', 'POST'])
@@ -69,51 +78,40 @@ def user_movies_search():
     user_id = int(user_id)
     user = data_manager.get_user(user_id)
     if user:
-        movies = [data_manager.get_movie({'id': mov_id}) for mov_id in user.watched_movies]
+        # Fetching movies directly from the user's watched_movies relationship
+        movies = user.watched_movies
         return render_template('user_movies_search.html', user=user, movies=movies)
 
     return render_template('user_movies_search.html', error="User not found")
 
+
 @app.route('/users/<int:user_id>/add_movie', methods=['POST'])
 def add_movie(user_id):
-    """
-    This route will display a form to add a new movie to a user’s list of favorite movies.
-
-    :param user_id: The ID of the user.
-    :body: {'id': 'movie_id if already exists in db' } or {'name': 'Movie Name from OMDB list'} or {'imdbID': 'IMDB ID of a movie'}
-    :return: Status of the operation.
-    """
-
-    # look if movie already exists in movies datastore
     req = request.get_json()
     movie = data_manager.get_movie(req)
-    if not movie:
-        if req.get('name'):
-            # if movie doesnot exists then add the movie to datastore
-            movie = data_manager.omdb(req.get('name'))
-            if not movie:
-                return jsonify({'status': f"Movie {req.get('name')} not found in OMDB list."})
-        else:
-            return jsonify({'status': "Please provide movie name from omdb \{'name': 'Spiderman'\}"})
-    # look for the user in user datastore
+
+    if not movie and req.get('name'):
+        movie = data_manager.omdb(req.get('name'))
+        if not movie:
+            return jsonify({'status': f"Movie {req.get('name')} not found in OMDB list."}), 404
+
     user = data_manager.get_user(user_id)
     if not user:
-        return jsonify({'status': f"User with user id {user_id} not found"})
-    if movie.id not in user.watched_movies:
-        user.watched_movies.append(movie.id)
+        return jsonify({'status': f"User with user id {user_id} not found"}), 404
 
-    # update the user datastore with the new movie
-    data_manager.update_user(user_id, user.__dict__)
+    if movie not in user.watched_movies:
+        user.watched_movies.append(movie)
+        data_manager.update_user(user_id, user.__dict__)
+
     return jsonify({'status': 'Movie added successfully to user favorites'})
 
-@app.route('/users/<user_id>/delete_movie/<movie_id>', methods=['DELETE'])
+@app.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=['DELETE'])
 def delete_movie(user_id, movie_id):
     status = data_manager.delete_user_movie(user_id, movie_id)
     if status:
         return jsonify({'status': 'Movie deleted successfully from your favorites list.'})
     else:
-        return jsonify({'status': f"Movie deletion failed. For User {user_id} and Movie {movie_id}"})
-
+        return jsonify({'status': f"Movie deletion failed. For User {user_id} and Movie {movie_id}"}), 404
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
@@ -123,7 +121,6 @@ def add_user():
     :return: Status of the operation.
     """
     user_data = request.get_json()
-    user_data['id'] = uuid.uuid1().int>>64
     new_user = User(**user_data)
     data_manager.create_user(new_user)
     return jsonify({'status': 'User added successfully'})

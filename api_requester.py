@@ -4,7 +4,6 @@ This module is used to make api request to OMDB.
 
 from abc import ABC, abstractmethod
 import requests
-import uuid
 
 class IApiRequester(ABC):
     """
@@ -79,7 +78,6 @@ class ApiRequester(IApiRequester):
 
         """
         return {
-            "id": uuid.uuid1().int>>64,
             "name": movie_data.get("Title"),
             "year": int(movie_data.get("Year")) or 0,
             "rating": float(movie_data.get("imdbRating")) or 0.0,

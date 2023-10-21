@@ -1,16 +1,19 @@
-'''
-User Datamodel
-'''
-from typing import List, Optional
-from dataclasses import dataclass, field
+from sqlalchemy import Column, Integer, String, ForeignKey, Table
+from sqlalchemy.orm import relationship
+from schema import db
 
-@dataclass
-class User:
-    '''
-        User Datamodel CLass
-    '''
-    id: int
-    name: str
-    email: str
-    watched_movies: Optional[List[int]] = field(default_factory=list)
+# Association table for the many-to-many relationship
+watched_movies_association = Table('watched_movies', db.metadata,
+    Column('user_id', Integer, ForeignKey('users.id')),
+    Column('movie_id', Integer, ForeignKey('movies.id'))
+)
 
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    email = Column(String, unique=True)
+    
+    # Define the many-to-many relationship using the association table
+    watched_movies = relationship('Movie', secondary=watched_movies_association, backref='watchers')

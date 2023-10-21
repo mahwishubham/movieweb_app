@@ -1,19 +1,14 @@
-'''
-Movies Datamodel
-'''
-from typing import List, Optional
-from dataclasses import dataclass, field
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship
+from schema import db
 
-@dataclass
-class Movie:
-    '''
-    Movies Datamodel Class
-    '''
-    id: int
-    name: str
-    director: str
-    year: int
-    rating: float
-    poster_url: str = ""
-    imdbID: str = ""
-    # watched_by: Optional[List[int]] = field(default_factory=list)
+class Movie(db.Model):
+    __tablename__ = 'movies'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    director = Column(String)
+    year = Column(Integer)
+    rating = Column(Float)
+    poster_url = Column(String, default="")
+    imdbID = Column(String, default="")
