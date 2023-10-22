@@ -2,6 +2,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from schema.movies import Movie
 from schema.user import User
+from schema.review import Review
+from schema.director import Director
+from schema.genre import Genre
 from api_requester import ApiRequester
 import os
 
@@ -84,3 +87,22 @@ class SQLDataManager:
         movie = Movie(**api_requester.extract_data(movie_data))
         self.create_movie(movie)
         return movie
+
+    def create_review(self, review: Review):
+        self.session.add(review)
+        self.session.commit()
+    
+
+    def create_director(self, director: Director):
+        self.session.add(director)
+        self.session.commit()
+
+    def get_director(self, director_id: int):
+        return self.session.query(Director).filter_by(id=director_id).first()
+
+    def create_genre(self, genre: Genre):
+        self.session.add(genre)
+        self.session.commit()
+
+    def get_genre(self, genre_id: int):
+        return self.session.query(Genre).filter_by(id=genre_id).first()

@@ -12,3 +12,7 @@ class Movie(db.Model):
     rating = Column(Float)
     poster_url = Column(String, default="")
     imdbID = Column(String, default="")
+
+    # director_id = Column(Integer, ForeignKey('directors.id'))
+    # director = relationship('Director', backref='movies')
+    # genres = relationship('Genre', secondary=movies_genres_association, backref='movies')

@@ -7,7 +7,7 @@ from schema import db
 from dotenv import load_dotenv
 from datamanager.sql_data_manager import SQLDataManager
 from schema.user import User
-
+from schema.review import Review
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
@@ -186,6 +186,36 @@ def get_movie(movie_id):
     else:
         movie = {}
     return jsonify(movie)
+
+@app.route('/movies/<int:movie_id>/add_review', methods=['POST'])
+def add_review(movie_id):
+    """
+    Endpoint to add a review for a specific movie by a user.
+
+    :param movie_id: The ID of the movie.
+    :return: Status of the operation.
+    """
+    data = request.get_json()
+    
+    user_id = data.get('userId')
+    review_text = data.get('reviewText')
+    
+    if not user_id or not review_text:
+        return jsonify({'status': 'User ID and Review text are required'}), 400
+
+    user = data_manager.get_user(user_id)
+    if not user:
+        return jsonify({'status': 'User not found'}), 404
+
+    movie = data_manager.get_movie({'id': movie_id})
+    if not movie:
+        return jsonify({'status': 'Movie not found'}), 404
+
+    # Create a Review instance and add it to the database.
+    review = Review(user_id=user_id, movie_id=movie_id, review_text=review_text)
+    data_manager.create_review(review)
+
+    return jsonify({'status': 'Review added successfully'})
 
 
 @app.errorhandler(404)
