@@ -24,10 +24,6 @@ class DataManagerInterface(ABC):
         """ Get a User by ID """
 
     @abstractmethod
-    def update_user_movie(self, user_id: int):
-        """ Update User Movie"""
-
-    @abstractmethod
     def update_user(self, user_id: int, new_info: dict):
         """ Update a User by ID """
 

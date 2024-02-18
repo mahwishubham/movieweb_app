@@ -2,13 +2,13 @@
 User Datamodel
 '''
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 @dataclass
 class User:
-    '''
-        User Datamodel CLass
-    '''
+    """
+    User Data model Class
+    """
     id: int
     name: str
     email: str

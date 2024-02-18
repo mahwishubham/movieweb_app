@@ -3,8 +3,8 @@ This module is used to make api request to OMDB.
 '''
 
 from abc import ABC, abstractmethod
-import requests
 import uuid
+import requests
 
 class IApiRequester(ABC):
     """

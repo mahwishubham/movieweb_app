@@ -134,9 +134,9 @@ class JSONDataManager(DataManagerInterface, ABC):
                 break
         movie_data = None
 
-        for movie in self.movies:
-            if movie.get(key) == search:
-                movie_data = movie
+        for mov in self.movies:
+            if mov.get(key) == search:
+                movie_data = mov
                 break
 
         return Movie(**movie_data) if movie_data else None
@@ -215,12 +215,11 @@ class JSONDataManager(DataManagerInterface, ABC):
         for movie in self.movies:
             if movie.get('name') == title:
                 print(f"Movie {title} already exists!")
-                return
+                return None
         movie_data = api_requester.request_movie_data(title)
         if not movie_data or movie_data.get("Response") == "False":
             print(f"Error: Movie {title} not found.")
-            return
+            return None
         movie = Movie(**api_requester.extract_data(movie_data))
         self.create_movie(movie)
         return movie
-

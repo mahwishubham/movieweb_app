@@ -1,8 +1,7 @@
 '''
 Movies Datamodel
 '''
-from typing import List, Optional
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 @dataclass
 class Movie:
@@ -18,6 +17,9 @@ class Movie:
     imdbID: str = ""
 
     def to_dict(self):
+        """
+        Converts the Movie object to a dictionary.
+        """
         return {
             'id': self.id,
             'name': self.name,
