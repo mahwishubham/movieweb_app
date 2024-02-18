@@ -31,9 +31,9 @@ class DataManagerInterface(ABC):
     def update_user(self, user_id: int, new_info: dict):
         """ Update a User by ID """
 
-    # @abstractmethod
-    # def delete_user(self, user_id: int):
-    #     """ Delete a User by ID """
+    @abstractmethod
+    def delete_user(self, user_id: int):
+        """ Delete a User by ID """
 
     @abstractmethod
     def create_movie(self, movie: Movie):
@@ -43,14 +43,18 @@ class DataManagerInterface(ABC):
     def get_movie(self, movie: dict) -> Movie:
         """ Get a Movie by ID """
 
-    # @abstractmethod
-    # def update_movie(self, movie_id: int, new_info: dict):
-    #     """ Update a Movie by ID """
-    #
-    # @abstractmethod
-    # def delete_movie(self, movie_id: int):
-    #     """ Delete a Movie by ID """
-    #
+    @abstractmethod
+    def update_user_movie(self, movie_id: int, user_id: int, new_info: dict):
+        """ Update Users Movie from this movie list"""
+
+    @abstractmethod
+    def update_movie(self, movie_id: int, new_info: dict):
+        """ Update a Movie by ID """
+
+    @abstractmethod
+    def delete_movie(self, movie_id: int):
+        """ Delete a Movie by ID """
+
     @abstractmethod
     def delete_user_movie(self, user_id: int, movie_id: int):
         ''' Delete Movie By User Id and Movie Id'''

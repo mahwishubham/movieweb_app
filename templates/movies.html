@@ -13,7 +13,6 @@
                 <p class="card-text">Directed by: {{ movie.director }}</p>
                 <p class="card-text">Year: {{ movie.year }}</p>
                 <p class="card-text">Rating: {{ movie.rating }}</p>
-                <button class="btn btn-primary watchMovie m-2" data-movie-id="{{ movie.id }}">Watch</button>
                 <button class="btn btn-primary editMovie m-2" data-movie-id="{{ movie.id }}">Edit</button>
                 <button class="btn btn-primary updateMovie m-2" data-movie-id="{{ movie.id }}" style="display: none;">Update</button>
                 <button class="btn btn-danger deleteMovie m-2" data-movie-id="{{ movie.id }}">Delete</button>
@@ -37,7 +36,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="movieModalLabel">New Movie</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form>
@@ -48,82 +47,15 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Watch Modal -->
-<div class="modal fade" id="watchMovieModal" tabindex="-1" aria-labelledby="watchMovieModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="watchMovieModalLabel">Watch Movie</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form>
-              <div class="form-group">
-                  <label for="userId">User ID</label>
-                  <input type="number" class="form-control" id="userId" name="userId" required>
-              </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="watchMovieBtn">Watch</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-
 <script>
 $(document).ready(function(){
-
-    $(".watchMovie").click(function(){
-    var movieId = $(this).data('movie-id');
-
-    // Get movie data from the server
-    $.ajax({
-        url: '/movies/get_movie/' + movieId,
-        type: 'GET',
-        contentType: 'application/json; charset=utf-8',
-        dataType: 'json',
-        async: true,
-        success: function(movieInfo) {
-            $("#watchMovieModal").modal('show');
-
-            // When "Watch" button in the modal is clicked
-            $("#watchMovieBtn").click(function(){
-                // Get the user ID from the form
-                var userId = $("#watchMovieModal input[name='userId']").val();
-                var data = {"id" : movieInfo.id }
-                // Perform AJAX call to add the movie to the user's watch list
-                $.ajax({
-                    url: '/users/' + userId + '/add_movie',
-                    type: 'POST',
-                    data: JSON.stringify(data),
-                    contentType: 'application/json; charset=utf-8',
-                    dataType: 'json',
-                    async: true,
-                    success: function(msg) {
-                        alert(msg.status);
-                        location.reload();
-                    },
-                    error: function(xhr, status, error) {
-                        alert("An error occurred: " + status + "\nError message: " + error);
-                    }
-                });
-            });
-        },
-        error: function(xhr, status, error) {
-            alert("An error occurred when trying to fetch movie data: " + status + "\nError message: " + error);
-        }
-        });
-    });
 
     $("#addMovie").click(function(){
         // Trigger the Modal Here
