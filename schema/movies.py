@@ -12,8 +12,18 @@ class Movie:
     id: int
     name: str
     director: str
-    year: int
+    year: str
     rating: float
     poster_url: str = ""
     imdbID: str = ""
-    watched_by: Optional[List[int]] = field(default_factory=list)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'director': self.director,
+            'year': self.year,
+            'rating': self.rating,
+            'poster_url': self.poster_url,
+            'imdbID': self.imdbID
+        }

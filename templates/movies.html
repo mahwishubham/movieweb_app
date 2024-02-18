@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-{% if movies %}
 <h1>All Movies</h1>
 <button id="addMovie" class="btn btn-primary mb-3">Add New Movie</button>
+{% if movies %}
 <div class="row">
     {% for movie in movies %}
     <div class="col-sm-4">
@@ -31,7 +31,7 @@
 <p>No movies found.</p>
 {% endif %}
 
-<!-- Modal -->
+<!-- Add Movie Modal -->
 <div class="modal fade" id="movieModal" tabindex="-1" aria-labelledby="movieModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">

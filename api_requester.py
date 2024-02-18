@@ -79,10 +79,10 @@ class ApiRequester(IApiRequester):
 
         """
         return {
-            "id": uuid.uuid1().int>>64,
+            "id": uuid.uuid1().int >> 64,
             "name": movie_data.get("Title"),
-            "year": int(movie_data.get("Year")) or 0,
-            "rating": float(movie_data.get("imdbRating")) or 0.0,
+            "year": movie_data.get("Year") or 0,
+            "rating": float(movie_data["imdbRating"]) if movie_data.get("imdbRating", "N/A") != "N/A" else 0.0,
             "poster_url": movie_data.get("Poster") if movie_data.get("Poster") != "N/A" else "",
             "imdbID": movie_data.get("imdbID") or "",
             "director": movie_data.get("Director") or "",

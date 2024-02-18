@@ -3,6 +3,8 @@ This is Json Datamanager
 '''
 import json
 import os
+from abc import ABC
+
 from dotenv import load_dotenv
 from datamanager.data_manager_interface import DataManagerInterface
 from schema.movies import Movie
@@ -13,19 +15,19 @@ load_dotenv()  # load environment variables from .env file
 API_KEY = os.getenv("API_KEY")  # read the API key from the .env file
 BASE_URL = "http://www.omdbapi.com"
 
-class JSONDataManager(DataManagerInterface):
-    '''
+class JSONDataManager(DataManagerInterface, ABC):
+    """
     JSON Data Manager handles CRUD operations for both User and Movie data models.
     It interfaces with JSON files storing User and Movie data.
-    '''
+    """
 
     def __init__(self, users_filename, movies_filename):
-        '''
+        """
         Initialize JSONDataManager with filenames for user and movie data.
-        
+
         :param user_filename: The filename of the JSON file storing user data.
         :param movie_filename: The filename of the JSON file storing movie data.
-        '''
+        """
         self.users_filename = users_filename
         self.movies_filename = movies_filename
         self.users = {}
@@ -55,32 +57,32 @@ class JSONDataManager(DataManagerInterface):
         # Return all the users
         return self.users
 
-    def get_user_movies(self, user_id):
-        '''Return all the movies for a given user'''
-        # Time: O (n) -> where n number of users 
-        user = next((user for user in self.users if user['id'] == user_id), None)
-        if user is not None:
-            movie_ids = user.get("watched_movies", []) # Time: O (1)
-            # Time: O (m) -> where m number of movies 
-            return [movie for movie in self.movies if movie['id'] in movie_ids]
+    def get_user_movies(self, user_id: int):
+        user_data = next((user for user in self.users if user['id'] == user_id), None)
+        return user_data['movies']
 
-        return None
-        # Total Time Complexity Is: T(max(n + m)) which is still linear
+    def update_user_movie(self, user_id: int):
+        """
+        Update User Movies List
+        :param user_id:
+        :return:
+        """
+        return 200
 
-    def update_user_movie(self, user_id: int, movie_id: int, new_info: dict):
-        '''
-            This method is used to updated user movies list
-        '''
-        # Update the details of a movie for a given user
-        movie = next((movie for movie in self.movies if movie['id'] == movie_id), None)
-        if movie is not None and user_id in movie['watched_by']:
-            print(movie, new_info)
-            movie.update(new_info)
-            print(movie)
-            self.save_data()
-            return True
-        return False
-
+    # def update_user_movie(self, user_id: int, movie_id: int, new_info: dict):
+    #     '''
+    #         This method is used to updated user movies list
+    #     '''
+    #     # Update the details of a movie for a given user
+    #     movie = next((movie for movie in self.movies if movie['id'] == movie_id), None)
+    #     if movie is not None and user_id in movie['watched_by']:
+    #         print(movie, new_info)
+    #         movie.update(new_info)
+    #         print(movie)
+    #         self.save_data()
+    #         return True
+    #     return False
+    #
     def create_user(self, user: User):
         '''
         Create a new User.
@@ -102,31 +104,32 @@ class JSONDataManager(DataManagerInterface):
         return User(**user_data) if user_data else None
 
     def update_user(self, user_id: int, new_info: dict):
-        '''
+        """
         Update a User by ID.
 
         :param user_id: The ID of the User to be updated.
         :param new_info: The dictionary containing new information to be updated.
-        '''
+        """
+        print(new_info)
         user = next((user for user in self.users if user['id'] == user_id), None)
         if user:
             user.update(new_info)
             self.save_data()
 
-    def delete_user(self, user_id: int):
-        '''
-        Delete a User by ID.
-
-        :param user_id: The ID of the User to be deleted.
-        '''
-        self.users = [user for user in self.users if user['id'] != user_id]
-        # Find user_id in all movies and delete them
-        for movie in self.movies:
-            if movie['watched_by'] is not None and user_id in movie['watched_by']:
-                movie['watched_by'] = [uid for uid in movie['watched_by'] if uid != user_id]
-
-        self.save_data()
-
+    # def delete_user(self, user_id: int):
+    #     '''
+    #     Delete a User by ID.
+    #
+    #     :param user_id: The ID of the User to be deleted.
+    #     '''
+    #     self.users = [user for user in self.users if user['id'] != user_id]
+    #     # Find user_id in all movies and delete them
+    #     for movie in self.movies:
+    #         if movie['watched_by'] is not None and user_id in movie['watched_by']:
+    #             movie['watched_by'] = [uid for uid in movie['watched_by'] if uid != user_id]
+    #
+    #     self.save_data()
+    #
     def create_movie(self, movie: Movie):
         '''
         Create a new Movie.
@@ -164,38 +167,57 @@ class JSONDataManager(DataManagerInterface):
         """
         return self.movies
 
-    def update_movie(self, movie_id: int, new_info: dict):
-        '''
-        Update a Movie by ID.
+    # def update_movie(self, movie_id: int, new_info: dict):
+    #     '''
+    #     Update a Movie by ID.
+    #
+    #     :param movie_id: The ID of the Movie to be updated.
+    #     :param new_info: The dictionary containing new information to be updated.
+    #     '''
+    #     movie = next((movie for movie in self.movies if movie['id'] == movie_id), None)
+    #     if movie:
+    #         movie.update(new_info)
+    #         self.save_data()
+    #
+    # def delete_movie(self, movie_id: int):
+    #     '''
+    #     Delete a Movie by ID.
+    #
+    #     :param movie_id: The ID of the Movie to be deleted.
+    #     '''
+    #     self.movies = [movie for movie in self.movies if movie['id'] != movie_id]
+    #     # Find movie_id in all users and delete them
+    #     for user in self.users:
+    #         if user['watched_movies'] is not None and movie_id in user['watched_movies']:
+    #             user['watched_movies'] = [mid for mid in user['watched_movies'] if mid != movie_id]
+    #
+    #     self.save_data()
 
-        :param movie_id: The ID of the Movie to be updated.
-        :param new_info: The dictionary containing new information to be updated.
-        '''
-        movie = next((movie for movie in self.movies if movie['id'] == movie_id), None)
-        if movie:
-            movie.update(new_info)
-            self.save_data()
-
-    def delete_movie(self, movie_id: int):
-        '''
-        Delete a Movie by ID.
-
+    def delete_user_movie(self, user_id: int, movie_id: int):
+        """
+        Delete a Movie From User Watch List.
+        :param user_id:
         :param movie_id: The ID of the Movie to be deleted.
-        '''
-        self.movies = [movie for movie in self.movies if movie['id'] != movie_id]
-        # Find movie_id in all users and delete them
-        for user in self.users:
-            if user['watched_movies'] is not None and movie_id in user['watched_movies']:
-                user['watched_movies'] = [mid for mid in user['watched_movies'] if mid != movie_id]
+        """
+        user_data = next((user for user in self.users if user['id'] == user_id), None)
+        if user_data:
+            movies = user_data.get('movies')
+            if movies.get(str(movie_id)):
+                del movies[str(movie_id)]
+                print(f"Movie with ID {movie_id} has been deleted.")
+                self.save_data()
+            else:
+                print(f"Movie with ID {movie_id} does not exist in the dictionary.")
 
-        self.save_data()
+        else:
+            print(f"User with ID {user_id} does not exist.")
 
     def omdb(self, title: str):
-        '''
+        """
         Seacrh of movie on omdb and return movie data
         :param title:
         :return: movie data
-        '''
+        """
 
         api_requester = ApiRequester(BASE_URL, API_KEY)
         for movie in self.movies:

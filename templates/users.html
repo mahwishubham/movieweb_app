@@ -2,6 +2,7 @@
 
 {% block content %}
 <h1>All Users</h1>
+<button id="addUser" class="btn btn-primary mb-3">Add New User</button>
 <table class="table">
     <thead>
         <tr>
@@ -14,10 +15,73 @@
     {% for user in users %}
         <tr>
             <td>{{ user.id }}</td>
-            <td><a href="{{ url_for('user_movies_search', userId=user.id) }}">{{ user.name }}</a></td>
+            <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
+            <td><a href="{{ url_for('get_user_movies', user_id=user.id) }}">Watched Movies</a></td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userModalLabel">New User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email">
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+$(document).ready(function(){
+
+    $("#addUser").click(function(){
+        // Trigger the Modal Here
+        $("#userModal").modal('show');
+    });
+
+    $("#userModal .btn-primary").click(function(){
+        // Get user details from the form
+        var name = $("#userModal input[name='name']").val();
+        var email = $("#userModal input[name='email']").val();
+        var movies = {}
+
+        // Perform AJAX call to add the movie
+        $.ajax({
+            url: '/add_user',
+            type: 'POST',
+            data: JSON.stringify({name: name, email: email, movies: movies}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            async: true,
+            success: function(msg) {
+                alert(msg.status);
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert("An error occurred: " + status + "\nError message: " + error);
+            }
+        });
+    });
+});
+</script>
+
 {% endblock %}

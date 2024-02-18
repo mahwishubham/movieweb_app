@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Welcome to MovieWeb App!</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Route</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>/add_user</td>
+            <td>POST</td>
+            <td>Use this route to add a user. You can use postman to add user. Required Data: name, email, movies={}</td>
+        </tr>
+        <tr>
+            <td>/add_movie</td>
+            <td>POST</td>
+            <td>Use this route to add a movie. You can use postman/ UI to add movie. Required Data: movie name. We use OMDB database to search the movie and add to the list.</td>
+        </tr>
+        <tr>
+            <td>/users</td>
+            <td>GET</td>
+            <td>List All Users in Tabular Fashion</td>
+        </tr>
+        <tr>
+            <td>/users/&lt;user_id&gt;</td>
+            <td>GET</td>
+            <td>This route will exhibit a specific user’s list of favorite movies.</td>
+        </tr>
+        <tr>
+            <td>/users/&lt;user_id&gt;/add_movie</td>
+            <td>POST</td>
+            <td>This route will display a form to add a new movie to a user’s list of favorite movies. You can select the Movie from movie list and click on watch button and enter userId. Or you can use postman with complete movie data or just a movie name.</td>
+        </tr>
+        <tr>
+            <td>/users/&lt;user_id&gt;/update_movie/&lt;movie_id&gt;</td>
+            <td>PUT</td>
+            <td>This route will display a form allowing for the updating of details of a specific movie in a user’s list.</td>
+        </tr>
+        <tr>
+            <td>/users/&lt;user_id&gt;/delete_movie/&lt;movie_id&gt;</td>
+            <td>DELETE</td>
+            <td>Upon visiting this route, a specific movie will be removed from a user’s favorite movie list.</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Hi {{ user.name }} 😃!</h1>
+<button id="addMovie" class="btn btn-primary mb-3" data-id="{{ user.id }}" data-name="{{ user.name }}" data-email="{{ user.email }}">Add Movie To Watchlist</button>
+<br>
+
+{% if movies %}
+<h3>Here is your watch history</h3>
+<div class="row">
+    {% for movie_id, movie in movies.items() %}
+    <div class="col-sm-4">
+        <div class="card mb-3" style="max-width: 18rem;">
+            <img src="{{ movie.poster_url or url_for('static', filename='default.jpg') }}" class="card-img-top img-fluid" alt="{{ movie.name }}" style="height:200px; object-fit:cover;">
+            <div class="card-body">
+                <h5 class="card-title">{{ movie.name }}</h5>
+                <p class="card-text">Directed by: {{ movie.director }}</p>
+                <p class="card-text">Year: {{ movie.year }}</p>
+                <p class="card-text">Rating: {{ movie.rating }}</p>
+                <button class="btn btn-danger deleteMovie m-2" data-movie-id="{{ movie.id }}" data-id="{{ user.id }}">Delete</button>
+                {% if movie.imdbID %}
+                    <a href="https://www.imdb.com/title/{{ movie.imdbID }}" class="btn btn-primary" target="_blank">View on IMDb</a>
+                {% else %}
+                    <p>No IMDb link available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Add Movie Modal -->
+<div class="modal fade" id="movieModal" tabindex="-1" aria-labelledby="movieModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="movieModalLabel">New Movie</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h3> Use 'id' OR  'name' OR 'imdbID' OR add movie</h3>
+        <form>
+            <div class="form-group">
+                <label for="movieTitle">Movie Title</label>
+                <input type="text" class="form-control" id="movieTitle" name="name">
+                <label for="movieId">Movie ID</label>
+                <input type="text" class="form-control" id="movieId" name="id">
+                <label for="movieimdbID">Movie Imdb ID</label>
+                <input type="text" class="form-control" id="movieimdbID" name="imdbID">
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+$(document).ready(function(){
+    var userId;
+
+    $("#addMovie").click(function(){
+        userId = $(this).data("id");
+        $("#movieModal").modal('show');
+    });
+
+    $("#movieModal .btn-primary").click(function(){
+        if (typeof userId === "undefined") {
+            alert("User ID is not defined.");
+            return; // Exit the function if userId is not defined
+        }
+        // Get movie details from the form
+        var movieTitle = $("#movieModal input[name='name']").val();
+        var movieID = $("#movieModal input[name='id']").val();
+        var movieImdbID = $("#movieModal input[name='imdbID']").val();
+
+        // Perform AJAX call to add the movie
+        $.ajax({
+            url: `/users/${userId}/add_movie`,
+            type: 'POST',
+            data: JSON.stringify({name: movieTitle, id: movieID, imdbID: movieImdbID}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            async: true,
+            success: function(msg) {
+                alert(msg.status);
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert("An error occurred: " + status + "\nError message: " + error);
+            }
+        });
+    });
+
+    $(".deleteMovie").click(function(){
+        var movieId = $(this).data('movie-id');
+        userId = $(this).data("id");
+        console.log(userId)
+        // Perform AJAX call to delete the movie
+        $.ajax({
+            url: `/users/${userId}/delete_movie/${movieId}`,
+            type: 'DELETE',
+            success: function(msg) {
+                alert(msg.status);
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert("An error occurred: " + status + "\nError message: " + error);
+            }
+        });
+    });
+
+});
+</script>
+{% endblock %}
