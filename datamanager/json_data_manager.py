@@ -171,8 +171,12 @@ class JSONDataManager(DataManagerInterface, ABC):
         if user_data:
             movies = user_data.get('movies')
             movie = movies.get(str(movie_id))
-            movie.update(new_info)
-            self.save_data()
+            # print("\n\n\n========================================\n\n\n")
+            # print(movies, movie_id, new_info)
+            # print("\n\n\n========================================\n\n\n")
+            if movie:
+                movie.update(new_info)
+                self.save_data()
         else:
             print(f"User with ID {user_id} does not exist.")
 

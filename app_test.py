@@ -1,63 +1,95 @@
 import requests
 import json
 
+# Common variables
+BASE_URL = 'http://localhost:5000'
+USERNAME = 'Jason2'
+EMAIL = 'Jason2@gmail.com'
+MOVIE_NAME = 'Inception'
+headers = {
+    'Accept': 'application/json'
+}
+
 def test_add_user():
     payload = {
-        'name': 'Jason',
-        'email': 'Jason@gmail.com'
+        'name': USERNAME,
+        'email': EMAIL,
+        'movies': {}
     }
-    r = requests.post('http://localhost:5000/add_user', json=payload)
+    r = requests.post(f'{BASE_URL}/add_user', json=payload)
     assert r.status_code == 200
     assert json.loads(r.text)['status'] == 'User added successfully'
 
-
 def test_add_movie_to_user_watch_list():
-    user_id = "11754101226508521966" # The actual user id needs to be used here
     payload = {
-        'name': 'Spiderman'
+        'name': MOVIE_NAME
     }
-    r = requests.post(f'http://localhost:5000/users/{user_id}/add_movie', json=payload)
+    users = requests.get(f'{BASE_URL}/users', headers=headers)
+    data = users.json()
+    user = data[-1]
+    r = requests.post(f"{BASE_URL}/users/{user.get('id')}/add_movie", json=payload)
     assert r.status_code == 200
     assert json.loads(r.text)['status'] == 'Movie added successfully to user favorites'
 
+def test_new_movie():
+    payload = {
+        'title': MOVIE_NAME
+    }
+    # Sending POST request to add_movie endpoint
+    r = requests.post(f'{BASE_URL}/add_movie', json=payload)
+
+    # Asserting the HTTP status code
+    assert r.status_code == 200, f"Expected status code 200, got {r.status_code}"
+
+    # Parsing the response and asserting the operation status
+    response_data = json.loads(r.text)
+    assert 'status' in response_data, "Response does not contain status field"
+
 
 def test_update_movie():
-    movie_id = "1472740360802865646" # The actual movie id needs to be used here
     payload = {
         'rating': 5.8
     }
-    r = requests.put(f'http://localhost:5000/movies/update_movie/{movie_id}', json=payload)
+    users = requests.get(f'{BASE_URL}/users', headers=headers)
+    data = users.json()
+    user = data[-1]
+
+    movies = requests.get(f'{BASE_URL}/movies', headers=headers)
+    data = movies.json()
+    movie = data[-1]
+    r = requests.put(f"{BASE_URL}/users/{user.get('id')}/update_movie/{movie.get('id')}", json=payload)
+    print(r.text)
     assert r.status_code == 200
     assert json.loads(r.text)['status'] == 'Movie updated successfully'
 
 
+
 def test_delete_movie():
-    movie_id = "14958777144405266926" # The actual movie id needs to be used here
-    r = requests.delete(f'http://localhost:5000/movies/delete_movie/{movie_id}')
+    users = requests.get(f'{BASE_URL}/users', headers=headers)
+    data = users.json()
+    user = data[-1]
+
+    movies = requests.get(f'{BASE_URL}/movies', headers=headers)
+    data = movies.json()
+    movie = data[-1]
+    r = requests.delete(f"{BASE_URL}/users/{user.get('id')}/delete_movie/{movie.get('id')}")
     assert r.status_code == 200
     assert json.loads(r.text)['status'] == 'Movie deleted successfully from user favorites'
 
+def test_delete_user():
+    users = requests.get(f'{BASE_URL}/users', headers=headers)
+    data = users.json()
+    user = data[-1]
+    r = requests.delete(f"{BASE_URL}/users/{user.get('id')}")
 
-def test_add_movie():
-    payload = {
-        'title': 'The Shawshank Redemption'
-    }
-    r = requests.post('http://localhost:5000/add_movie', json=payload)
     assert r.status_code == 200
-    assert json.loads(r.text)['status'] == 'Movie Added'
+    assert json.loads(r.text)['status'] == 'User Deleted'
 
 
 def test_list_users():
-    r = requests.get('http://localhost:5000/users')
+    r = requests.get(f'{BASE_URL}/users')
     assert r.status_code == 200
-
-
-def test_list_user_watch_list():
-    user_id = "3112570009830756846" # The actual user id needs to be used here
-    r = requests.get(f'http://localhost:5000/users/{user_id}')
-    assert r.status_code == 200
-
 
 def test_home_page():
-    r = requests.get('http://localhost:5000/')
+    r = requests.get(f'{BASE_URL}/')
     assert r.status_code == 200

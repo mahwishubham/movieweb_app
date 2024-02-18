@@ -27,7 +27,12 @@ def get_users():
 
     :return: List of all users.
     """
+
     users = data_manager.get_all_users()
+    # Check the request's "Accept" header
+    if request.headers.get('Accept') == 'application/json':
+        return jsonify(users)  # Return JSON response
+
     return render_template('users.html', users=users)
 
 @app.route('/users/<int:user_id>', methods=['GET'])
@@ -40,6 +45,7 @@ def get_user_movies(user_id):
     """
     movies = data_manager.get_user_movies(user_id)
     user = data_manager.get_user(user_id)
+
     return render_template('user_movies.html', movies=movies, user=user)
 
 @app.route('/add_user', methods=['POST'])
@@ -112,6 +118,12 @@ def delete_user_movie(user_id, movie_id):
 # =======================================================================
 #   EXTRA FEATURES
 # =======================================================================
+
+@app.route('/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    data_manager.delete_user(user_id)
+    return jsonify({'status': 'User Deleted'})
+
 @app.route('/movies', methods=['GET'])
 def get_movies():
     """
@@ -120,6 +132,10 @@ def get_movies():
     """
 
     movies = data_manager.get_all_movies()
+    # Check the request's "Accept" header
+    if request.headers.get('Accept') == 'application/json':
+        return jsonify(movies)  # Return JSON response
+
     return render_template('movies.html', movies=movies)
 
 @app.route('/add_movie', methods=['POST'])
